@@ -10,8 +10,6 @@ import scala.util.{Failure, Success, Try}
 
 sealed trait SQLPrimitive
 
-case class PShort(value: Short) extends SQLPrimitive
-case class PInteger(value: Int) extends SQLPrimitive
 case class PLong(value: Long) extends SQLPrimitive
 case class PString(value: String) extends SQLPrimitive
 case class PDate(value: String) extends SQLPrimitive
@@ -63,11 +61,9 @@ object SQLPrimitive {
   implicit class NamedParameterStatementJDBC(statement: NamedParameterStatement) {
     def populateStatement(name: String, value: SQLPrimitive)  {
       value match {
-        case PShort(v) => statement.setInt(name, v)
-        case PInteger(v) => statement.setInt(name, v)
         case PLong(v) => statement.setLong(name, v)
         case PString(v) => statement.setString(name, v)
-        case PDate(v) => statement.setTimestamp(name, Timestamp.from(Instant.ofEpochMilli(formats.parse(v).getTime)))
+        case PDate(v) => statement.setTimestamp(name, new Timestamp(formats.parse(v).getTime))
         case NullP => statement.setNull(name, Types.VARCHAR)
       }
     }

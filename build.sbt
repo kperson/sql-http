@@ -3,18 +3,21 @@ lazy val commonSettings = Seq(
   version := "1.0.0",
   scalaVersion := "2.13.5",
   parallelExecution in Test := false,
-  fork := true
+  fork in Test := true
 )
 lazy val common = (project in file("common")).settings(commonSettings: _*).
   settings(
     libraryDependencies ++= Seq (
-      "mysql"                   % "mysql-connector-java"        % "8.0.23",
-      "org.mariadb.jdbc"        % "mariadb-java-client"         % "2.7.2",
-      "org.postgresql"          % "postgresql"                  % "42.2.19",
-      "net.snowflake"           % "snowflake-jdbc"              % "3.13.2",
-      "org.json4s"             %% "json4s-jackson"              % "3.6.11",
-      "org.sql2o"               % "sql2o"                       % "1.3.0",
-      "org.scalatest"          %% "scalatest"                   % "3.2.7" % Test
+      "mysql"                   % "mysql-connector-java"            % "8.0.23",
+      "org.mariadb.jdbc"        % "mariadb-java-client"             % "2.7.2",
+      "org.postgresql"          % "postgresql"                      % "42.2.19",
+      "net.snowflake"           % "snowflake-jdbc"                  % "3.13.2",
+      "org.json4s"             %% "json4s-jackson"                  % "3.6.11",
+      "org.sql2o"               % "sql2o"                           % "1.3.0",
+      "org.scalatest"          %% "scalatest"                       % "3.2.7"   % Test,
+      "com.dimafeng"           %% "testcontainers-scala-scalatest"  % "0.39.3"  % Test,
+      "com.dimafeng"           %% "testcontainers-scala-mysql"      % "0.39.3" % Test,
+      "com.dimafeng"           %% "testcontainers-scala-postgresql" % "0.39.3" % Test
     )
   )
 

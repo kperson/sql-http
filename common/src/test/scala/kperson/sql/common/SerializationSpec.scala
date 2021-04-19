@@ -110,7 +110,6 @@ class SerializationSpec extends AnyFlatSpec with Matchers {
 
   it should "read and write SQL Primitives" in {
     val primitives  = List[(SQLPrimitive, String)](
-      (PInteger(3), """{"dataType":"Integer","data":3}"""),
       (PLong(4), """{"dataType":"Long","data":4}"""),
       (NullP, """{"dataType":"Null"}""")
     )

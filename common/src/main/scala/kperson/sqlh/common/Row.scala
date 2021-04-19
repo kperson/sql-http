@@ -49,10 +49,14 @@ object Row {
         meta.getColumnType(index) match {
           case Types.TIMESTAMP => PDate(SQLPrimitive.formats.timestampFormat.format(rs.getTimestamp(index)))
           case Types.DATE => PDate(SQLPrimitive.formats.timestampFormat.format(rs.getDate(index)))
-          case Types.INTEGER => PLong(rs.getInt(index))
-          case Types.TINYINT => PLong(rs.getShort(index))
-          case Types.BIGINT => PLong(rs.getInt(index))
-          case _ => PString(rs.getObject(index).toString)
+          case Types.INTEGER => PLong(rs.getLong(index))
+          case Types.SMALLINT => PLong(rs.getLong(index))
+          case Types.TINYINT => PLong(rs.getLong(index))
+          case Types.BIGINT => PLong(rs.getLong(index))
+          case _ => {
+            println(meta.getColumnTypeName(index))
+            PString(rs.getObject(index).toString)
+          }
         }
       }
     }

@@ -13,18 +13,14 @@ object Serialization {
       case jsonObj: JObject =>
         val dataType = (jsonObj \ "dataType").extract[String]
         dataType match {
-          case "Integer" => PInteger((jsonObj \ "data").extract[Int])
           case "Long" => PLong((jsonObj \ "data").extract[Long])
-          case "Short" => PShort((jsonObj \ "data").extract[Short])
           case "String" => PString((jsonObj \ "data").extract[String])
           case "Date" => PDate((jsonObj \ "data").extract[String])
           case "Null" => NullP
         }
     },
     {
-      case v: PInteger => Extraction.decompose(EnumerationWrapper("Integer", v.value))
       case v: PLong => Extraction.decompose(EnumerationWrapper("Long", v.value))
-      case v: PShort => Extraction.decompose(EnumerationWrapper("Short", v.value))
       case v: PString => Extraction.decompose(EnumerationWrapper("String", v.value))
       case v: PDate => Extraction.decompose(EnumerationWrapper("Date", v.value))
       case _: NullP.type => Extraction.decompose(EnumerationWrapperOptional("Null", None))

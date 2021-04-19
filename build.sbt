@@ -13,6 +13,7 @@ lazy val common = (project in file("common")).settings(commonSettings: _*).
       "org.postgresql"          % "postgresql"                  % "42.2.19",
       "net.snowflake"           % "snowflake-jdbc"              % "3.13.2",
       "org.json4s"             %% "json4s-jackson"              % "3.6.11",
+      "org.sql2o"               % "sql2o"                       % "1.3.0",
       "org.scalatest"          %% "scalatest"                   % "3.2.7" % Test
     )
   )

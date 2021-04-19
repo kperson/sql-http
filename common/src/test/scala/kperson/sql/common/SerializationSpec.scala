@@ -68,12 +68,12 @@ class SerializationSpec extends AnyFlatSpec with Matchers {
   it should "write begin transaction sql command" in {
     val command: SQLCommand = BeginTransaction(DataSource("jdbc:mysql://localhost:3306/mydb"))
     val json = write(command)
-    val expectedJSON = """{"dataType":"BeginTransaction","data":{"value":{"jdbcURL":"jdbc:mysql://localhost:3306/mydb"}}}"""
+    val expectedJSON = """{"dataType":"BeginTransaction","data":{"dataSource":{"jdbcURL":"jdbc:mysql://localhost:3306/mydb"}}}"""
     json shouldBe expectedJSON
   }
 
   it should "read begin transaction sql command" in {
-    val json = """{"dataType":"BeginTransaction","data":{"value":{"jdbcURL":"jdbc:mysql://localhost:3306/mydb"}}}"""
+    val json = """{"dataType":"BeginTransaction","data":{"dataSource":{"jdbcURL":"jdbc:mysql://localhost:3306/mydb"}}}"""
     val command = read[SQLCommand](json)
     val expectedCommand: SQLCommand = BeginTransaction(DataSource("jdbc:mysql://localhost:3306/mydb"))
     command shouldBe expectedCommand
@@ -108,21 +108,82 @@ class SerializationSpec extends AnyFlatSpec with Matchers {
     command shouldBe expectedCommand
   }
 
-  it should "write statement sql command" in {
-    val command: SQLCommand = Statement(
+  it should "read and write SQL Primitives" in {
+    val primitives  = List[(SQLPrimitive, String)](
+      (PInteger(3), """{"dataType":"Integer","data":3}"""),
+      (PLong(4), """{"dataType":"Long","data":4}"""),
+      (NullP, """{"dataType":"Null"}""")
+    )
+    primitives.foreach { case (primitive, expectedJSON) =>
+      val json = write(primitive)
+      json shouldBe expectedJSON
+      val readPrimitive = read[SQLPrimitive](expectedJSON)
+      readPrimitive shouldBe primitive
+    }
+  }
+
+  it should "write query sql command" in {
+    val command: SQLCommand = Query(
       "SELECT * FROM test_table",
+      Map(),
       OneOff(DataSource("jdbc:mysql://localhost:3306/mydb"))
     )
     val json = write(command)
-    val expectedJSON = """{"dataType":"Statement","data":{"sql":"SELECT * FROM test_table","transactionReference":{"dataType":"OneOff","data":{"jdbcURL":"jdbc:mysql://localhost:3306/mydb"}}}}"""
+    println(json)
+    val expectedJSON = """{"dataType":"Query","data":{"sql":"SELECT * FROM test_table","params":{},"transactionReference":{"dataType":"OneOff","data":{"jdbcURL":"jdbc:mysql://localhost:3306/mydb"}}}}"""
     json shouldBe expectedJSON
   }
 
-  it should "read statement sql command" in {
-    val json = """{"dataType":"Statement","data":{"sql":"SELECT * FROM test_table","transactionReference":{"dataType":"OneOff","data":{"jdbcURL":"jdbc:mysql://localhost:3306/mydb"}}}}"""
+  it should "read query sql command" in {
+    val json = """{"dataType":"Query","data":{"sql":"SELECT * FROM test_table","params":{},"transactionReference":{"dataType":"OneOff","data":{"jdbcURL":"jdbc:mysql://localhost:3306/mydb"}}}}"""
     val command = read[SQLCommand](json)
-    val expectedCommand: SQLCommand = Statement(
+    val expectedCommand: SQLCommand = Query(
       "SELECT * FROM test_table",
+      Map(),
+      OneOff(DataSource("jdbc:mysql://localhost:3306/mydb"))
+    )
+    command shouldBe expectedCommand
+  }
+
+  it should "write write sql command" in {
+    val command: SQLCommand = Write(
+      "UPDATE test_table SET col = 1",
+      Map(),
+      OneOff(DataSource("jdbc:mysql://localhost:3306/mydb"))
+    )
+    val json = write(command)
+    val expectedJSON = """{"dataType":"Write","data":{"sql":"UPDATE test_table SET col = 1","params":{},"transactionReference":{"dataType":"OneOff","data":{"jdbcURL":"jdbc:mysql://localhost:3306/mydb"}}}}"""
+    json shouldBe expectedJSON
+  }
+
+  it should "read write sql command" in {
+    val json = """{"dataType":"Write","data":{"sql":"UPDATE test_table SET col = 1","params":{},"transactionReference":{"dataType":"OneOff","data":{"jdbcURL":"jdbc:mysql://localhost:3306/mydb"}}}}"""
+    val command = read[SQLCommand](json)
+    val expectedCommand: SQLCommand = Write(
+      "UPDATE test_table SET col = 1",
+      Map(),
+      OneOff(DataSource("jdbc:mysql://localhost:3306/mydb"))
+    )
+    command shouldBe expectedCommand
+  }
+
+  it should "write batch write sql command" in {
+    val command: SQLCommand =  BatchWrite(
+      "UPDATE test_table SET col = 1",
+      List(),
+      OneOff(DataSource("jdbc:mysql://localhost:3306/mydb"))
+    )
+    val json = write(command)
+    val expectedJSON = """{"dataType":"BatchWrite","data":{"sql":"UPDATE test_table SET col = 1","params":[],"transactionReference":{"dataType":"OneOff","data":{"jdbcURL":"jdbc:mysql://localhost:3306/mydb"}}}}"""
+    json shouldBe expectedJSON
+  }
+
+  it should "read batch write sql command" in {
+    val json = """{"dataType":"BatchWrite","data":{"sql":"UPDATE test_table SET col = 1","params":[],"transactionReference":{"dataType":"OneOff","data":{"jdbcURL":"jdbc:mysql://localhost:3306/mydb"}}}}"""
+    val command = read[SQLCommand](json)
+    val expectedCommand: SQLCommand = BatchWrite(
+      "UPDATE test_table SET col = 1",
+      List(),
       OneOff(DataSource("jdbc:mysql://localhost:3306/mydb"))
     )
     command shouldBe expectedCommand

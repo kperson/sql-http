@@ -6,6 +6,30 @@ import org.json4s.JsonAST._
 object Serialization {
 
   private case class EnumerationWrapper[T](dataType: String, data: T)
+  private case class EnumerationWrapperOptional[T](dataType: String, data: Option[T])
+
+  private object SQLPrimitiveSerializer extends CustomSerializer[SQLPrimitive](implicit format => (
+    {
+      case jsonObj: JObject =>
+        val dataType = (jsonObj \ "dataType").extract[String]
+        dataType match {
+          case "Integer" => PInteger((jsonObj \ "data").extract[Int])
+          case "Long" => PLong((jsonObj \ "data").extract[Long])
+          case "Short" => PShort((jsonObj \ "data").extract[Short])
+          case "String" => PString((jsonObj \ "data").extract[String])
+          case "Date" => PDate((jsonObj \ "data").extract[String])
+          case "Null" => NullP
+        }
+    },
+    {
+      case v: PInteger => Extraction.decompose(EnumerationWrapper("Integer", v.value))
+      case v: PLong => Extraction.decompose(EnumerationWrapper("Long", v.value))
+      case v: PShort => Extraction.decompose(EnumerationWrapper("Short", v.value))
+      case v: PString => Extraction.decompose(EnumerationWrapper("String", v.value))
+      case v: PDate => Extraction.decompose(EnumerationWrapper("Date", v.value))
+      case _: NullP.type => Extraction.decompose(EnumerationWrapperOptional("Null", None))
+    }
+  ))
 
   private object MaskedSerializer extends CustomSerializer[Masked](implicit format => (
     {
@@ -13,7 +37,7 @@ object Serialization {
         Masked(jsonObj.values)
     },
     {
-      case v: Masked => Extraction.decompose(v.value)
+      case v: Masked => Extraction.decompose(v.value)(format)
     }
   ))
 
@@ -36,6 +60,7 @@ object Serialization {
 
   val tmpFormats = org.json4s.DefaultFormats +
     MaskedSerializer +
+    SQLPrimitiveSerializer +
     TransactionReferenceSerializer
 
   private class SQLCommandSerializer(implicit val formats: Formats) extends CustomSerializer[SQLCommand](_ => (
@@ -45,18 +70,21 @@ object Serialization {
         dataType match {
           case "BeginTransaction" => jsonObj.extract[EnumerationWrapper[BeginTransaction]].data
           case "Commit" => jsonObj.extract[EnumerationWrapper[Commit]].data
-          case "Statement" => jsonObj.extract[EnumerationWrapper[Statement]].data
+          case "Query" => jsonObj.extract[EnumerationWrapper[Query]].data
+          case "Write" => jsonObj.extract[EnumerationWrapper[Write]].data
+          case "BatchWrite" => jsonObj.extract[EnumerationWrapper[BatchWrite]].data
           case "Rollback" => jsonObj.extract[EnumerationWrapper[Rollback]].data
         }
     },
     {
       case v: BeginTransaction => Extraction.decompose(EnumerationWrapper("BeginTransaction", v))(formats)
       case v: Commit => Extraction.decompose(EnumerationWrapper("Commit", v))(formats)
-      case v: Statement => Extraction.decompose(EnumerationWrapper("Statement", v))(formats)
+      case v: Query => Extraction.decompose(EnumerationWrapper("Query", v))(formats)
+      case v: Write => Extraction.decompose(EnumerationWrapper("Write", v))(formats)
+      case v: BatchWrite => Extraction.decompose(EnumerationWrapper("BatchWrite", v))(formats)
       case v: Rollback => Extraction.decompose(EnumerationWrapper("Rollback", v))(formats)
     }
   ))
-
 
 
   implicit val formats = tmpFormats + new SQLCommandSerializer()(tmpFormats)

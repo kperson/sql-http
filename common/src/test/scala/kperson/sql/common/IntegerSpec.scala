@@ -5,7 +5,7 @@ import org.scalatest.matchers.should.Matchers
 
 class IntegerSpec extends DBTest with Matchers {
 
-  private val mysqlCreate = """
+  private val defaultCreate = """
       |CREATE TABLE int_table (
       |  big_int_col BIGINT NULL,
       |  int_col INT NULL,
@@ -25,7 +25,7 @@ class IntegerSpec extends DBTest with Matchers {
       |);
       |""".stripMargin
 
-  private val createSQl = TestSQL(mysqlCreate, Map(Postgres -> postgresCreate))
+  private val createSQl = TestSQL(defaultCreate, Map(Postgres -> postgresCreate))
 
   "Integers" should "read and write to DBs" in {
     foreachDB { case (dataSource, vendor) =>

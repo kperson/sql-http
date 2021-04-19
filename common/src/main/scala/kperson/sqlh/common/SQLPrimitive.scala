@@ -2,9 +2,9 @@ package kperson.sqlh.common
 
 import org.sql2o.tools.NamedParameterStatement
 
+import java.io.ByteArrayInputStream
 import java.sql.{Timestamp, Types}
 import java.text.SimpleDateFormat
-import java.time.Instant
 import java.util.Date
 import scala.util.{Failure, Success, Try}
 
@@ -13,6 +13,7 @@ sealed trait SQLPrimitive
 case class PLong(value: Long) extends SQLPrimitive
 case class PString(value: String) extends SQLPrimitive
 case class PDate(value: String) extends SQLPrimitive
+case class PBlob(value: String) extends SQLPrimitive
 case object NullP extends SQLPrimitive
 
 object SQLPrimitive {
@@ -20,14 +21,14 @@ object SQLPrimitive {
   val formats = new DateFormats()
 
   class DateFormats {
-    val timestampFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
-    private val dateFormat = new SimpleDateFormat("yyyy-MM-dd")
+    val timestampFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS")
+    val dateFormat = new SimpleDateFormat("yyyy-MM-dd")
 
-    private val parseFormats = List(
-      new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'"),
-      new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX"),
-      new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXX"),
-      new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX"),
+    val parseFormats = List(
+      new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+      new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX"),
+      new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXX"),
+      new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"),
       timestampFormat,
       dateFormat
     )
@@ -63,6 +64,7 @@ object SQLPrimitive {
       value match {
         case PLong(v) => statement.setLong(name, v)
         case PString(v) => statement.setString(name, v)
+        case PBlob(v) => statement.setInputStream(name, new ByteArrayInputStream(java.util.Base64.getDecoder.decode(v)))
         case PDate(v) => statement.setTimestamp(name, new Timestamp(formats.parse(v).getTime))
         case NullP => statement.setNull(name, Types.VARCHAR)
       }

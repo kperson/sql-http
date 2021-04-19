@@ -5,7 +5,7 @@ object LoadDrivers {
   def apply(): Unit ={
     Class.forName("com.mysql.cj.jdbc.Driver")
     Class.forName("org.postgresql.Driver")
-    Class.forName("com.snowflake.client.jdbc.SnowflakeDriver")
+    Class.forName("org.mariadb.jdbc.Driver")
   }
 
 }

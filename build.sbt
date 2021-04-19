@@ -11,13 +11,14 @@ lazy val common = (project in file("common")).settings(commonSettings: _*).
       "mysql"                   % "mysql-connector-java"            % "8.0.23",
       "org.mariadb.jdbc"        % "mariadb-java-client"             % "2.7.2",
       "org.postgresql"          % "postgresql"                      % "42.2.19",
-      "net.snowflake"           % "snowflake-jdbc"                  % "3.13.2",
       "org.json4s"             %% "json4s-jackson"                  % "3.6.11",
       "org.sql2o"               % "sql2o"                           % "1.3.0",
-      "org.scalatest"          %% "scalatest"                       % "3.2.7"   % Test,
-      "com.dimafeng"           %% "testcontainers-scala-scalatest"  % "0.39.3"  % Test,
-      "com.dimafeng"           %% "testcontainers-scala-mysql"      % "0.39.3" % Test,
-      "com.dimafeng"           %% "testcontainers-scala-postgresql" % "0.39.3" % Test
+      "org.scalatest"          %% "scalatest"                       % "3.2.7"     % Test,
+      "com.dimafeng"           %% "testcontainers-scala-scalatest"  % "0.39.3"    % Test,
+      "com.dimafeng"           %% "testcontainers-scala-mysql"      % "0.39.3"    % Test,
+      "com.dimafeng"           %% "testcontainers-scala-mariadb"    % "0.39.3"    % Test,
+      "com.dimafeng"           %% "testcontainers-scala-postgresql" % "0.39.3"    % Test,
+      "ch.qos.logback"          % "logback-classic"                 % "1.2.3"     % Test
     )
   )
 

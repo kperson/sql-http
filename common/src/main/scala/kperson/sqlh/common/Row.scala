@@ -1,8 +1,6 @@
 package kperson.sqlh.common
 
-import java.sql.{Connection, DriverManager, ResultSet, Types}
-import java.text.SimpleDateFormat
-import java.util.{Date, Properties, TimeZone}
+import java.sql.{ResultSet, Types}
 
 case class Column(
   index: Int,
@@ -49,12 +47,14 @@ object Row {
         meta.getColumnType(index) match {
           case Types.TIMESTAMP => PDate(SQLPrimitive.formats.timestampFormat.format(rs.getTimestamp(index)))
           case Types.DATE => PDate(SQLPrimitive.formats.timestampFormat.format(rs.getDate(index)))
-          case Types.INTEGER => PLong(rs.getLong(index))
-          case Types.SMALLINT => PLong(rs.getLong(index))
-          case Types.TINYINT => PLong(rs.getLong(index))
-          case Types.BIGINT => PLong(rs.getLong(index))
+          case Types.INTEGER | Types.SMALLINT | Types.TINYINT | Types.BIGINT => PLong(rs.getLong(index))
+          case Types.VARCHAR | Types.NVARCHAR | Types.LONGVARCHAR | Types.LONGNVARCHAR | Types.CHAR | Types.NCHAR => PString(rs.getString(index))
+          case Types.BLOB => {
+            val is = rs.getBinaryStream(index)
+            val bytes = LazyList.continually(is.read).takeWhile(_ != -1).map(_.toByte).toArray
+            PBlob(java.util.Base64.getEncoder.encodeToString(bytes))
+          }
           case _ => {
-            println(meta.getColumnTypeName(index))
             PString(rs.getObject(index).toString)
           }
         }

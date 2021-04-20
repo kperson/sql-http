@@ -23,6 +23,7 @@ object SQLPrimitive {
   val formats = new DateFormats()
 
   class DateFormats {
+    private val timeFormat  = new SimpleDateFormat("HH:mm:ssX")
     val timestampFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS")
     val dateFormat = new SimpleDateFormat("yyyy-MM-dd")
     val parseFormats = List(
@@ -62,17 +63,23 @@ object SQLPrimitive {
     }
 
     def parseTimeOnly(timeStr: String): Long = {
-      val str = if (timeStr.startsWith("-1")) timeStr.substring(1) else timeStr
-      val strSplit = str.split(":").toList
-      val split: List[(String, Long)] = strSplit.reverse.zip(List(1_000L, 60_000L, 3600_000L).take(strSplit.size))
-      val rs = split.foldLeft(0L) { case (acc, (longAsStr, multi))  =>
-        acc + multi * longAsStr.toLong
-      }
-      if (timeStr.startsWith("-1")) {
-        rs * -1L
+      val isPostgresTime = (timeStr.contains("-") || timeStr.contains("+")) && !timeStr.startsWith("-")
+      if (isPostgresTime) {
+        timeFormat.parse(timeStr).getTime
       }
       else {
-        rs
+        val str = if (timeStr.startsWith("-")) timeStr.substring(1) else timeStr
+        val strSplit = str.split(":").toList
+        val split: List[(String, Long)] = strSplit.reverse.zip(List(1_000L, 60_000L, 3600_000L).take(strSplit.size))
+        val rs = split.foldLeft(0L) { case (acc, (longAsStr, multi)) =>
+          acc + multi * longAsStr.toLong
+        }
+        if (timeStr.startsWith("-")) {
+          rs * -1L
+        }
+        else {
+          rs
+        }
       }
     }
 

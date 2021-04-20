@@ -10,7 +10,10 @@ class StringSpec extends DBTest with Matchers {
       |CREATE TABLE string_table (
       |  varchar_col VARCHAR(10) NULL,
       |  char_col VARCHAR(10) NULL,
-      |  text_col TEXT NULL
+      |  text_col TEXT NULL,
+      |  tiny_col TINYTEXT NULL,
+      |  medium_col MEDIUMTEXT NULL,
+      |  long_col LONGTEXT NULL
       |);
       |""".stripMargin
 
@@ -18,7 +21,10 @@ class StringSpec extends DBTest with Matchers {
       |CREATE TABLE string_table (
       |  varchar_col VARCHAR(10) NULL,
       |  char_col CHAR(10) NULL,
-      |  text_col TEXT NULL
+      |  text_col TEXT NULL,
+      |  tiny_col TEXT NULL,
+      |  medium_col TEXT NULL,
+      |  long_col TEXT NULL
       |);
       |""".stripMargin
 
@@ -30,15 +36,18 @@ class StringSpec extends DBTest with Matchers {
       val sql = createSQl.sql(vendor)
       connection.prepareStatement(sql).execute()
       val insert = """
-        INSERT INTO string_table (varchar_col, char_col, text_col)
-        VALUES (:varchar_col, :char_col, :text_col)
+        INSERT INTO string_table (varchar_col, char_col, text_col, tiny_col, medium_col, long_col)
+        VALUES (:varchar_col, :char_col, :text_col, :tiny_col, :medium_col, :long_col)
       """
 
-      val abc = List("a", "b", "c")
+      val abc = List("a", "b", "c", "d", "e", "f")
       val params = Map(
         "varchar_col" -> PString(abc(0)),
         "char_col" -> PString(abc(1)),
-        "text_col" -> PString(abc(2))
+        "text_col" -> PString(abc(2)),
+        "tiny_col" ->  PString(abc(3)),
+        "medium_col" ->  PString(abc(4)),
+        "long_col" ->  PString(abc(5))
       )
       ExecuteWrite(connection, Write(insert, params))
 

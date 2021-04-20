@@ -39,17 +39,21 @@ object Row {
 
     def primitiveValue(index: Int): SQLPrimitive = {
       val meta = rs.getMetaData
-      rs.getObject(index)
+      rs.getString(index)
       if (rs.wasNull()) {
         NullP
       }
       else {
         meta.getColumnType(index) match {
-          case Types.TIMESTAMP => PDate(SQLPrimitive.formats.timestampFormat.format(rs.getTimestamp(index)))
+          case Types.TIMESTAMP | Types.TIME_WITH_TIMEZONE => PDate(SQLPrimitive.formats.timestampFormat.format(rs.getTimestamp(index)))
           case Types.DATE => PDate(SQLPrimitive.formats.timestampFormat.format(rs.getDate(index)))
           case Types.INTEGER | Types.SMALLINT | Types.TINYINT | Types.BIGINT => PLong(rs.getLong(index))
+          case Types.TIME => {
+            val time = SQLPrimitive.formats.parseTimeOnly(rs.getString(index))
+            PTime(time)
+          }
           case Types.VARCHAR | Types.NVARCHAR | Types.LONGVARCHAR | Types.LONGNVARCHAR | Types.CHAR | Types.NCHAR => PString(rs.getString(index))
-          case Types.BLOB => {
+          case Types.LONGVARBINARY | Types.BINARY | Types.VARBINARY | Types.BLOB => {
             val is = rs.getBinaryStream(index)
             val bytes = LazyList.continually(is.read).takeWhile(_ != -1).map(_.toByte).toArray
             PBlob(java.util.Base64.getEncoder.encodeToString(bytes))

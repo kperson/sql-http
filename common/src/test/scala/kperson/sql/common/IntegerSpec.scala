@@ -2,6 +2,8 @@ package kperson.sql.common
 
 import kperson.sqlh.common.{Column, ExecuteQuery, ExecuteWrite, PLong, Query, Write}
 import org.scalatest.matchers.should.Matchers
+import kperson.sqlh.common.Postgres
+
 
 class IntegerSpec extends DBTest with Matchers {
 

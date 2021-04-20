@@ -1,7 +1,7 @@
 package kperson.sql.common
 
 import com.dimafeng.testcontainers._
-import kperson.sqlh.common.{DataSource, LoadDrivers, Masked, UsernamePassword}
+import kperson.sqlh.common.{DataSource, DatabaseVendor, LoadDrivers, MariaDB, Masked, MySQL, Postgres, UsernamePassword}
 import org.scalatest.BeforeAndAfter
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should._
@@ -24,7 +24,7 @@ class DBTest extends AnyFlatSpec with ForEachTestContainer with BeforeAndAfter w
     val postgres: (DataSource, DatabaseVendor) = (DataSource(postgresContainer.jdbcUrl, Some(UsernamePassword(postgresContainer.username, Masked(postgresContainer.password)))), Postgres)
     val mariaDB: (DataSource, DatabaseVendor) = (DataSource(mariaContainer.jdbcUrl, Some(UsernamePassword(mariaContainer.username, Masked(mariaContainer.password)))), MariaDB)
 
-    List(mysql, mariaDB, postgres).foreach { case (source, vendor) =>
+    List(mysql, postgres, mariaDB).foreach { case (source, vendor) =>
       dbFun(source, vendor)
     }
   }

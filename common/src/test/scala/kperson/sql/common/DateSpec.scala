@@ -6,6 +6,7 @@ import org.scalatest.matchers.should.Matchers
 import java.text.SimpleDateFormat
 import scala.math.abs
 
+
 class DateSpec extends DBTest with Matchers {
 
   private val defaultCreate = """

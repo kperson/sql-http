@@ -5,6 +5,9 @@ import org.scalatest.matchers.should.Matchers
 
 import java.util.Base64
 
+import ExecuteQuery._
+import ExecuteWrite._
+
 
 class BinarySpec extends DBTest with Matchers {
 
@@ -30,9 +33,8 @@ class BinarySpec extends DBTest with Matchers {
 
   "Binary" should "read and write to DBs" in {
     foreachDB { case (dataSource, vendor) =>
-      val connection = dataSource.createConnection()
       val sql = createSQl.sql(vendor)
-      connection.prepareStatement(sql).execute()
+      ConnectionPool.getConnection(dataSource).prepareStatement(sql).execute()
       val insert = """
         INSERT INTO binary_table (blob_col, med_col, tiny_col, binary_col)
         VALUES (:blob_col, :med_col, :tiny_col, :binary_col)
@@ -45,9 +47,9 @@ class BinarySpec extends DBTest with Matchers {
         "tiny_col" -> blobParam,
         "binary_col" -> blobParam
       )
-      ExecuteWrite(connection, Write(insert, params))
+      Write(Direct(dataSource), insert, params).run()
       val select = "SELECT * FROM binary_table"
-      val result = ExecuteQuery(connection, Query(select)).toList
+      val result = Query(Direct(dataSource), select).run()
       result.size shouldBe 1
       result.head.columns.foreach { col =>
         col.value shouldBe a [PBlob]

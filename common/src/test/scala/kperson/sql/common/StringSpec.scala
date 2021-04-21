@@ -3,6 +3,9 @@ package kperson.sql.common
 import kperson.sqlh.common._
 import org.scalatest.matchers.should.Matchers
 
+import ExecuteQuery._
+import ExecuteWrite._
+
 
 class StringSpec extends DBTest with Matchers {
 
@@ -32,9 +35,8 @@ class StringSpec extends DBTest with Matchers {
 
   "String" should "read and write to DBs" in {
     foreachDB { case (dataSource, vendor) =>
-      val connection = dataSource.createConnection()
       val sql = createSQl.sql(vendor)
-      connection.prepareStatement(sql).execute()
+      ConnectionPool.getConnection(dataSource).prepareStatement(sql).execute()
       val insert = """
         INSERT INTO string_table (varchar_col, char_col, text_col, tiny_col, medium_col, long_col)
         VALUES (:varchar_col, :char_col, :text_col, :tiny_col, :medium_col, :long_col)
@@ -42,17 +44,17 @@ class StringSpec extends DBTest with Matchers {
 
       val abc = List("a", "b", "c", "d", "e", "f")
       val params = Map(
-        "varchar_col" -> PString(abc(0)),
+        "varchar_col" -> PString(abc.head),
         "char_col" -> PString(abc(1)),
         "text_col" -> PString(abc(2)),
         "tiny_col" ->  PString(abc(3)),
         "medium_col" ->  PString(abc(4)),
         "long_col" ->  PString(abc(5))
       )
-      ExecuteWrite(connection, Write(insert, params))
+      Write(Direct(dataSource), insert, params).run()
 
       val select = "SELECT * FROM string_table"
-      val result = ExecuteQuery(connection, Query(select)).toList
+      val result = Query(Direct(dataSource), select).run()
       result.size shouldBe 1
       result.head.columns.zipWithIndex.foreach { case (col: Column, index: Int)  =>
           col.value shouldBe a [PString]

@@ -11,10 +11,7 @@ case class Column(
 
 case class Row(columns: List[Column])
 
-
-
 object Row {
-
 
   implicit class ResultSetJDBC(rs: ResultSet) {
     def toRow(): Row = {

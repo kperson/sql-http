@@ -1,8 +1,9 @@
 package kperson.sql.common
 
-import kperson.sqlh.common.{Column, ExecuteQuery, ExecuteWrite, PLong, Query, Write}
+import kperson.sqlh.common.{Column, ConnectionPool, Direct, ExecuteQuery, ExecuteWrite, PLong, Postgres, Query, Write}
 import org.scalatest.matchers.should.Matchers
-import kperson.sqlh.common.Postgres
+import ExecuteQuery._
+import ExecuteWrite._
 
 
 class IntegerSpec extends DBTest with Matchers {
@@ -31,9 +32,8 @@ class IntegerSpec extends DBTest with Matchers {
 
   "Integers" should "read and write to DBs" in {
     foreachDB { case (dataSource, vendor) =>
-      val connection = dataSource.createConnection()
       val sql = createSQl.sql(vendor)
-      connection.prepareStatement(sql).execute()
+      ConnectionPool.getConnection(dataSource).prepareStatement(sql).execute()
       val insert = """
         INSERT INTO int_table (big_int_col, int_col, medium_int_col, small_int_col, tiny_int_col)
         VALUES (:big_int_col, :int_col, :medium_int_col, :small_int_col, :tiny_int_col)
@@ -45,7 +45,7 @@ class IntegerSpec extends DBTest with Matchers {
         "small_int_col" -> PLong(4),
         "tiny_int_col" -> PLong(5)
       )
-      ExecuteWrite(connection, Write(insert, params))
+      Write(Direct(dataSource), insert, params).run()
       val select =
         """
           |SELECT * FROM int_table
@@ -55,7 +55,7 @@ class IntegerSpec extends DBTest with Matchers {
           |AND small_int_col = :small_int_col
           |AND tiny_int_col = :tiny_int_col
           |""".stripMargin
-      val result = ExecuteQuery(connection, Query(select, params)).toList
+      val result = Query(Direct(dataSource), select, params).run()
       result.size shouldBe 1
       result.head.columns.zipWithIndex.foreach { case (col: Column, index: Int) =>
         col.value shouldBe a [PLong]

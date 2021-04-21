@@ -15,14 +15,18 @@ object Serialization {
         dataType match {
           case "Long" => PLong((jsonObj \ "data").extract[Long])
           case "String" => PString((jsonObj \ "data").extract[String])
+          case "Blob" => PBlob((jsonObj \ "data").extract[String])
           case "Date" => PDate((jsonObj \ "data").extract[String])
+          case "Time" => PTime((jsonObj \ "data").extract[Long])
           case "Null" => NullP
         }
     },
     {
       case v: PLong => Extraction.decompose(EnumerationWrapper("Long", v.value))
       case v: PString => Extraction.decompose(EnumerationWrapper("String", v.value))
+      case v: PBlob => Extraction.decompose(EnumerationWrapper("Blob", v.value))
       case v: PDate => Extraction.decompose(EnumerationWrapper("Date", v.value))
+      case v: PTime => Extraction.decompose(EnumerationWrapper("Time", v.value))
       case _: NullP.type => Extraction.decompose(EnumerationWrapperOptional("Null", None))
     }
   ))
@@ -37,19 +41,17 @@ object Serialization {
     }
   ))
 
-  private object TransactionReferenceSerializer extends CustomSerializer[TransactionReference](implicit format => (
+  private object TransactionReferenceSerializer extends CustomSerializer[DataSourceReference](implicit format => (
     {
       case jsonObj: JObject =>
         val dataType = (jsonObj \ "dataType").extract[String]
         dataType match {
-          case "OneOff" => OneOff(jsonObj.extract[EnumerationWrapper[DataSource]].data)
-          case "TransactionId" => TransactionId(jsonObj.extract[EnumerationWrapper[String]].data)
+          case "Direct" => Direct(jsonObj.extract[EnumerationWrapper[DataSource]].data)
           case "Custom" => Custom(jsonObj.extract[EnumerationWrapper[String]].data)
         }
     },
     {
-      case v: OneOff =>  Extraction.decompose(EnumerationWrapper("OneOff", v.value))
-      case v: TransactionId => Extraction.decompose(EnumerationWrapper("TransactionId", v.value))
+      case v: Direct =>  Extraction.decompose(EnumerationWrapper("Direct", v.value))
       case v: Custom => Extraction.decompose(EnumerationWrapper("Custom", v.value))
     }
   ))
@@ -64,21 +66,15 @@ object Serialization {
       case jsonObj: JObject =>
         val dataType = (jsonObj \ "dataType").extract[String]
         dataType match {
-          case "BeginTransaction" => jsonObj.extract[EnumerationWrapper[BeginTransaction]].data
-          case "Commit" => jsonObj.extract[EnumerationWrapper[Commit]].data
           case "Query" => jsonObj.extract[EnumerationWrapper[Query]].data
           case "Write" => jsonObj.extract[EnumerationWrapper[Write]].data
           case "BatchWrite" => jsonObj.extract[EnumerationWrapper[BatchWrite]].data
-          case "Rollback" => jsonObj.extract[EnumerationWrapper[Rollback]].data
         }
     },
     {
-      case v: BeginTransaction => Extraction.decompose(EnumerationWrapper("BeginTransaction", v))(formats)
-      case v: Commit => Extraction.decompose(EnumerationWrapper("Commit", v))(formats)
       case v: Query => Extraction.decompose(EnumerationWrapper("Query", v))(formats)
       case v: Write => Extraction.decompose(EnumerationWrapper("Write", v))(formats)
       case v: BatchWrite => Extraction.decompose(EnumerationWrapper("BatchWrite", v))(formats)
-      case v: Rollback => Extraction.decompose(EnumerationWrapper("Rollback", v))(formats)
     }
   ))
 

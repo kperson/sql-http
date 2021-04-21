@@ -35,7 +35,7 @@ object SQLPrimitive {
       dateFormat
     )
 
-    def formatTimeOnlyDecomposed(milliSeconds: Long): (Int, Int, Int) = {
+    def decomposeTime(milliSeconds: Long): (Int, Int, Int) = {
       val milli = abs(milliSeconds)
       val hours = milli / 3600_000
       var remaining = milli - (hours * 3600_000)
@@ -46,20 +46,9 @@ object SQLPrimitive {
     }
 
     def formatTimeOnly(milliSeconds: Long): String = {
-      val milli = abs(milliSeconds)
-      val hours = milli / 3600_000
-      var remaining = milli - (hours * 3600_000)
-      val minutes = remaining / 60_000
-      remaining = remaining - (minutes * 60_000)
-      val seconds = remaining / 1000
+      val (hours, minutes, seconds) = decomposeTime(abs(milliSeconds))
       val rs = String.format("%03d", hours) + ":" + String.format("%02d", minutes) + ":" + String.format("%02d", seconds)
-      if(milliSeconds < 0) {
-         "-1" + rs
-      }
-      else {
-        rs
-      }
-
+      if (milliSeconds < 0) "-" + rs else rs
     }
 
     def parseTimeOnly(timeStr: String): Long = {
@@ -119,7 +108,7 @@ object SQLPrimitive {
         case PTime(v) => {
           val isPostgres = statement.getStatement.getConnection.getMetaData.getURL.toLowerCase.startsWith("jdbc:postgresql")
           if (isPostgres) {
-            val (hours, minutes, seconds) = formats.formatTimeOnlyDecomposed(v)
+            val (hours, minutes, seconds) = formats.decomposeTime(v)
             statement.setTime(name, Time.valueOf(s"$hours:$minutes:$seconds"))
           }
           else {

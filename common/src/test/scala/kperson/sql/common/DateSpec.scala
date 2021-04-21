@@ -6,6 +6,9 @@ import org.scalatest.matchers.should.Matchers
 import java.text.SimpleDateFormat
 import scala.math.abs
 
+import ExecuteQuery._
+import ExecuteWrite._
+
 
 class DateSpec extends DBTest with Matchers {
 
@@ -29,9 +32,8 @@ class DateSpec extends DBTest with Matchers {
 
   "Date" should "read and write to DBs" in {
     foreachDB { case (dataSource, vendor) =>
-      val connection = dataSource.createConnection()
       val sql = createSQl.sql(vendor)
-      connection.prepareStatement(sql).execute()
+      ConnectionPool.getConnection(dataSource).prepareStatement(sql).execute()
       val insert = """
         INSERT INTO date_table (timestamp_col, datetime_col, date_col)
         VALUES (:timestamp_col, :datetime_col, :date_col)
@@ -44,10 +46,10 @@ class DateSpec extends DBTest with Matchers {
           "datetime_col" -> PDate(format.format(today)),
           "date_col" -> PDate(SQLPrimitive.formats.dateFormat.format(today))
         )
-        ExecuteWrite(connection, Write(insert, params))
+        Write(Direct(dataSource), insert, params).run()
         val select = "SELECT * FROM date_table"
-        val result = ExecuteQuery(connection, Query(select)).toList
-        ExecuteWrite(connection, Write("DELETE FROM date_table", Map()))
+        val result = Query(Direct(dataSource), select).run()
+        Write(Direct(dataSource), "DELETE FROM date_table").run()
 
         result.size shouldBe 1
         result.head.columns.foreach { col  =>

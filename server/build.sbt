@@ -12,7 +12,7 @@ lazy val common = (project in file("common")).settings(commonSettings: _*).
       "org.mariadb.jdbc"        % "mariadb-java-client"             % "2.7.2",
       "org.postgresql"          % "postgresql"                      % "42.2.19",
       "org.json4s"             %% "json4s-jackson"                  % "3.6.11",
-      "org.sql2o"               % "sql2o"                           % "1.3.0",
+      "org.sql2o"               % "sql2o"                           % "1.4.0",
       "com.zaxxer"              % "HikariCP"                        % "4.0.3",
       "org.scalatest"          %% "scalatest"                       % "3.2.7"     % Test,
       "com.dimafeng"           %% "testcontainers-scala-scalatest"  % "0.39.3"    % Test,

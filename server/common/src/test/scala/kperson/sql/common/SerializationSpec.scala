@@ -52,7 +52,7 @@ class SerializationSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "read and write SQL Primitives" in {
-    val primitives  = List[(SQLPrimitive, String)](
+    val primitives  = List[(SQLValue, String)](
       (PLong(4), """{"dataType":"Long","data":4}"""),
       (NullP, """{"dataType":"Null"}"""),
       (PString("abc"), """{"dataType":"String","data":"abc"}"""),
@@ -63,7 +63,7 @@ class SerializationSpec extends AnyFlatSpec with Matchers {
     primitives.foreach { case (primitive, expectedJSON) =>
       val json = write(primitive)
       json shouldBe expectedJSON
-      val readPrimitive = read[SQLPrimitive](expectedJSON)
+      val readPrimitive = read[SQLValue](expectedJSON)
       readPrimitive shouldBe primitive
     }
   }

@@ -49,6 +49,8 @@ object Row {
             val time = SQLValue.formats.parseTimeOnly(rs.getString(index))
             PTime(time)
           }
+          case Types.DOUBLE | Types.FLOAT | Types.REAL  => PDouble(rs.getDouble(index))
+          case Types.DECIMAL | Types.NUMERIC => PDecimal(rs.getString(index))
           case Types.VARCHAR | Types.NVARCHAR | Types.LONGVARCHAR | Types.LONGNVARCHAR | Types.CHAR | Types.NCHAR => PString(rs.getString(index))
           case Types.LONGVARBINARY | Types.BINARY | Types.VARBINARY | Types.BLOB => {
             val is = rs.getBinaryStream(index)

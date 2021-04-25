@@ -12,15 +12,12 @@ import scala.util.{Failure, Success, Try}
 sealed trait SQLValue
 
 case class PLong(value: Long) extends SQLValue
-
 case class PString(value: String) extends SQLValue
-
 case class PDate(value: String) extends SQLValue
-
 case class PBlob(value: String) extends SQLValue
-
 case class PTime(value: Long) extends SQLValue
-
+case class PDouble(value: Double) extends SQLValue
+case class PDecimal(value: String) extends SQLValue
 case object NullP extends SQLValue
 
 object SQLValue {
@@ -110,6 +107,8 @@ object SQLValue {
         case PString(v) => statement.setString(name, v)
         case PBlob(v) => statement.setInputStream(name, new ByteArrayInputStream(java.util.Base64.getDecoder.decode(v)))
         case PDate(v) => statement.setTimestamp(name, new Timestamp(formats.parse(v).getTime))
+        case PDouble(v) => statement.setString(name, v.toString)
+        case PDecimal(v) => statement.setString(name, v)
         case PTime(v) => {
           val isPostgres = statement.getStatement.getConnection.getMetaData.getURL.toLowerCase.startsWith("jdbc:postgresql")
           if (isPostgres) {

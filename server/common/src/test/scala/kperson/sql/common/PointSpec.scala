@@ -4,8 +4,6 @@ import kperson.sqlh.common.ExecuteQuery._
 import kperson.sqlh.common.ExecuteWrite._
 import kperson.sqlh.common._
 import org.scalatest.matchers.should.Matchers
-
-import java.util.Base64
 import scala.math.abs
 
 

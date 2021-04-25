@@ -1,9 +1,7 @@
 package kperson.sqlh.common
 
-import org.sql2o.tools.NamedParameterStatement
-
 import java.io.ByteArrayInputStream
-import java.sql.{Time, Timestamp, Types}
+import java.sql.{Connection, Time, Timestamp, Types}
 import java.text.SimpleDateFormat
 import java.util.Date
 import scala.math.abs
@@ -100,33 +98,39 @@ object SQLValue {
   }
 
 
-  implicit class NamedParameterStatementJDBC(statement: NamedParameterStatement) {
-    def populateStatement(name: String, value: SQLValue) {
+  implicit class NamedParameterStatementJDBC(statement: org.sql2o.Query) {
+    def populateStatement(name: String, value: SQLValue, connection: Connection) {
       value match {
-        case PLong(v) => statement.setLong(name, v)
-        case PString(v) => statement.setString(name, v)
-        case PBlob(v) => statement.setInputStream(name, new ByteArrayInputStream(java.util.Base64.getDecoder.decode(v)))
-        case PDate(v) => statement.setTimestamp(name, new Timestamp(formats.parse(v).getTime))
-        case PDouble(v) => statement.setString(name, v.toString)
-        case PDecimal(v) => statement.setString(name, v)
+        case PLong(v) => statement.addParameter(name, v)
+        case PString(v) => statement.addParameter(name, v)
+        case PBlob(v) => statement.addParameter(name, new ByteArrayInputStream(java.util.Base64.getDecoder.decode(v)))
+        case PDate(v) => statement.addParameter(name, new Timestamp(formats.parse(v).getTime))
+        case PDouble(v) => {
+          val d: java.lang.Double = v
+          statement.addParameter(name, d)
+        }
+        case PDecimal(v) => statement.addParameter(name, new java.math.BigDecimal(v))
         case PTime(v) => {
-          val isPostgres = statement.getStatement.getConnection.getMetaData.getURL.toLowerCase.startsWith("jdbc:postgresql")
+          val isPostgres = connection.getMetaData.getURL.toLowerCase.startsWith("jdbc:postgresql")
           if (isPostgres) {
             val (hours, minutes, seconds) = formats.decomposeTime(v)
-            statement.setTime(name, Time.valueOf(s"$hours:$minutes:$seconds"))
+            statement.addParameter(name, Time.valueOf(s"$hours:$minutes:$seconds"))
           }
           else {
             val formatted = formats.formatTimeOnly(v)
-            statement.setString(name, formatted)
+            statement.addParameter(name, formatted)
           }
         }
-        case NullP => statement.setNull(name, Types.VARCHAR)
+        case NullP => {
+          val x: String = null
+          statement.addParameter(name, x)
+        }
       }
     }
 
-    def populateStatement(params: Map[String, SQLValue]) {
+    def populateStatement(params: Map[String, SQLValue], connection: Connection) {
       params.foreach { case (name, value) =>
-        statement.populateStatement(name, value)
+        statement.populateStatement(name, value, connection)
       }
     }
   }

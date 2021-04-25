@@ -18,6 +18,8 @@ object Serialization {
           case "Blob" => PBlob((jsonObj \ "data").extract[String])
           case "Date" => PDate((jsonObj \ "data").extract[String])
           case "Time" => PTime((jsonObj \ "data").extract[Long])
+          case "Double" => PDouble((jsonObj \ "data").extract[Double])
+          case "Decimal" => PDecimal((jsonObj \ "data").extract[String])
           case "Null" => NullP
         }
     },
@@ -27,6 +29,8 @@ object Serialization {
       case v: PBlob => Extraction.decompose(EnumerationWrapper("Blob", v.value))
       case v: PDate => Extraction.decompose(EnumerationWrapper("Date", v.value))
       case v: PTime => Extraction.decompose(EnumerationWrapper("Time", v.value))
+      case v: PDouble => Extraction.decompose(EnumerationWrapper("Double", v.value))
+      case v: PDecimal => Extraction.decompose(EnumerationWrapper("Decimal", v.value))
       case _: NullP.type => Extraction.decompose(EnumerationWrapperOptional("Null", None))
     }
   ))

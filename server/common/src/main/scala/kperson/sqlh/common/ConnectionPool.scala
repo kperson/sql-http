@@ -12,9 +12,20 @@ object ConnectionPool {
   private val pools = scala.collection.mutable.Map[DataSource, HikariDataSource]()
 
   def getConnection(resolvers: List[DataSourceReferenceResolver], reference: DataSourceReference): Connection = {
+    getJDBCDataSource(resolvers, reference).getConnection
+  }
+
+  def getJDBCDataSource(resolvers: List[DataSourceReferenceResolver], reference: DataSourceReference): HikariDataSource = {
     reference match {
-      case Direct(source) => getConnection(source)
-      case c: Custom => getConnection(lookupDataSource(c, resolvers))
+      case Direct(source) => getJDBCDataSource(source)
+      case c: Custom => getJDBCDataSource(lookupDataSource(c, resolvers))
+    }
+  }
+
+  def getDataSource(resolvers: List[DataSourceReferenceResolver], reference: DataSourceReference): DataSource = {
+    reference match {
+      case Direct(source) => source
+      case c: Custom => lookupDataSource(c, resolvers)
     }
   }
 
@@ -29,15 +40,19 @@ object ConnectionPool {
   }
 
   def getConnection(dataSource: DataSource): Connection = {
-      pools.get(dataSource) match {
-        case Some(source) => source.getConnection
-        case _ =>
-          this.synchronized {
-            val source = new HikariDataSource(createHikariConfig(dataSource))
-            pools(dataSource) = source
-            source.getConnection
-          }
-      }
+    getJDBCDataSource(dataSource).getConnection
+  }
+
+  def getJDBCDataSource(dataSource: DataSource): HikariDataSource = {
+    pools.get(dataSource) match {
+      case Some(source) => source
+      case _ =>
+        this.synchronized {
+          val source = new HikariDataSource(createHikariConfig(dataSource))
+          pools(dataSource) = source
+          source
+        }
+    }
   }
 
   private def createHikariConfig(dataSource: DataSource): HikariConfig = {

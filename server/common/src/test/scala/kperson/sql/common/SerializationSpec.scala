@@ -58,7 +58,9 @@ class SerializationSpec extends AnyFlatSpec with Matchers {
       (PString("abc"), """{"dataType":"String","data":"abc"}"""),
       (PTime(2), """{"dataType":"Time","data":2}"""),
       (PBlob("aGVsbG8gd29ybGQ="), """{"dataType":"Blob","data":"aGVsbG8gd29ybGQ="}"""),
-      (PDate("2020-03-21"), """{"dataType":"Date","data":"2020-03-21"}""")
+      (PDate("2020-03-21"), """{"dataType":"Date","data":"2020-03-21"}"""),
+      (PDouble(3.14), """{"dataType":"Double","data":3.14}"""),
+      (PDecimal("3.14"), """{"dataType":"Decimal","data":"3.14"}""")
     )
     primitives.foreach { case (primitive, expectedJSON) =>
       val json = write(primitive)

@@ -47,7 +47,8 @@ class BinarySpec extends DBTest with Matchers {
         "tiny_col" -> blobParam,
         "binary_col" -> blobParam
       )
-      Write(Direct(dataSource), insert, params).run()
+      val results = Write(Direct(dataSource), insert, params).run()
+      results.numberOfAffectedRows shouldBe 1
       val select = "SELECT * FROM binary_table"
       val result = Query(Direct(dataSource), select).run()
       result.size shouldBe 1

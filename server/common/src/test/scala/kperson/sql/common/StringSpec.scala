@@ -1,65 +1,61 @@
 package kperson.sql.common
 
+import kperson.sqlh.common.ExecuteQuery._
+import kperson.sqlh.common.ExecuteWrite._
 import kperson.sqlh.common._
 import org.scalatest.matchers.should.Matchers
 
-import ExecuteQuery._
-import ExecuteWrite._
+import java.util.Base64
 
 
 class StringSpec extends DBTest with Matchers {
 
   private val defaultCreate = """
-      |CREATE TABLE string_table (
-      |  varchar_col VARCHAR(10) NULL,
-      |  char_col VARCHAR(10) NULL,
-      |  text_col TEXT NULL,
-      |  tiny_col TINYTEXT NULL,
-      |  medium_col MEDIUMTEXT NULL,
-      |  long_col LONGTEXT NULL
+      |CREATE TABLE binary_table (
+      |  blob_col BLOB,
+      |  med_col MEDIUMBLOB,
+      |  tiny_col TINYBLOB,
+      |  binary_col BINARY(200)
       |);
       |""".stripMargin
 
   private val postgresCreate = """
-      |CREATE TABLE string_table (
-      |  varchar_col VARCHAR(10) NULL,
-      |  char_col CHAR(10) NULL,
-      |  text_col TEXT NULL,
-      |  tiny_col TEXT NULL,
-      |  medium_col TEXT NULL,
-      |  long_col TEXT NULL
+      |CREATE TABLE binary_table (
+      |  blob_col BYTEA,
+      |  med_col BYTEA,
+      |  tiny_col BYTEA,
+      |  binary_col BYTEA
       |);
       |""".stripMargin
 
   private val createSQl = TestSQL(defaultCreate, Map(Postgres -> postgresCreate))
 
-  "String" should "read and write to DBs" in {
+  "Binary" should "read and write to DBs" in {
     foreachDB { case (dataSource, vendor) =>
       val sql = createSQl.sql(vendor)
       ConnectionPool.getConnection(dataSource).prepareStatement(sql).execute()
       val insert = """
-        INSERT INTO string_table (varchar_col, char_col, text_col, tiny_col, medium_col, long_col)
-        VALUES (:varchar_col, :char_col, :text_col, :tiny_col, :medium_col, :long_col)
+        INSERT INTO binary_table (blob_col, med_col, tiny_col, binary_col)
+        VALUES (:blob_col, :med_col, :tiny_col, :binary_col)
       """
-
-      val abc = List("a", "b", "c", "d", "e", "f")
+      val text = "hello world, how are you today?, im fine."
+      val blobParam =  PBlob(Base64.getEncoder.encodeToString(text.getBytes))
       val params = Map(
-        "varchar_col" -> PString(abc.head),
-        "char_col" -> PString(abc(1)),
-        "text_col" -> PString(abc(2)),
-        "tiny_col" ->  PString(abc(3)),
-        "medium_col" ->  PString(abc(4)),
-        "long_col" ->  PString(abc(5))
+        "blob_col" -> blobParam,
+        "med_col" -> blobParam,
+        "tiny_col" -> blobParam,
+        "binary_col" -> blobParam
       )
-      Write(Direct(dataSource), insert, params).run()
-
-      val select = "SELECT * FROM string_table"
+      val results = Write(Direct(dataSource), insert, params).run()
+      results.numberOfAffectedRows shouldBe 1
+      val select = "SELECT * FROM binary_table"
       val result = Query(Direct(dataSource), select).run()
       result.size shouldBe 1
-      result.head.columns.zipWithIndex.foreach { case (col: Column, index: Int)  =>
-          col.value shouldBe a [PString]
-          val str = col.value.asInstanceOf[PString].value
-          str.trim shouldBe abc(index)
+      result.head.columns.foreach { col =>
+        col.value shouldBe a [PBlob]
+        val blob = col.value.asInstanceOf[PBlob]
+        val decodedText = new String(Base64.getDecoder.decode(blob.value)).trim
+        decodedText shouldBe text
       }
     }
   }

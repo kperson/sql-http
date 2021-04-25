@@ -8,7 +8,7 @@ object Serialization {
   private case class EnumerationWrapper[T](dataType: String, data: T)
   private case class EnumerationWrapperOptional[T](dataType: String, data: Option[T])
 
-  private object SQLPrimitiveSerializer extends CustomSerializer[SQLPrimitive](implicit format => (
+  private object SQLPrimitiveSerializer extends CustomSerializer[SQLValue](implicit format => (
     {
       case jsonObj: JObject =>
         val dataType = (jsonObj \ "dataType").extract[String]

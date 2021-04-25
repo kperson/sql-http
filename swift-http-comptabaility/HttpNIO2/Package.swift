@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "swift-http-nio1",
+    name: "swift-http-nio2",
     products: [
         .library(name: "HttpNIO2", targets: ["HttpNIO2"]),
         

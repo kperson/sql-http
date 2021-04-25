@@ -40,11 +40,11 @@ class DateSpec extends DBTest with Matchers {
       """
       val today = new java.util.Date()
 
-      SQLPrimitive.formats.parseFormats.foreach { format =>
+      SQLValue.formats.parseFormats.foreach { format =>
         val params = Map(
           "timestamp_col" -> PDate(format.format(today)),
           "datetime_col" -> PDate(format.format(today)),
-          "date_col" -> PDate(SQLPrimitive.formats.dateFormat.format(today))
+          "date_col" -> PDate(SQLValue.formats.dateFormat.format(today))
         )
         Write(Direct(dataSource), insert, params).run()
         val select = "SELECT * FROM date_table"
@@ -61,7 +61,7 @@ class DateSpec extends DBTest with Matchers {
             todayStr shouldBe dateStr
           }
           else if (format.toPattern != "yyyy-MM-dd") {
-            val date = SQLPrimitive.formats.timestampFormat.parse(col.value.asInstanceOf[PDate].value)
+            val date = SQLValue.formats.timestampFormat.parse(col.value.asInstanceOf[PDate].value)
             abs(today.getTime - date.getTime) should be < 1000L
           }
         }

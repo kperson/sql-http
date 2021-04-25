@@ -32,4 +32,7 @@ lazy val lambda = (project in file("lambda")).settings(commonSettings: _*).
   ).dependsOn(common)
 
 
-lazy val http = (project in file("http")).settings(commonSettings: _*).dependsOn(common)
+lazy val http = (project in file("http"))
+.settings(commonSettings: _*)
+.enablePlugins(JavaAppPackaging)
+.dependsOn(common)

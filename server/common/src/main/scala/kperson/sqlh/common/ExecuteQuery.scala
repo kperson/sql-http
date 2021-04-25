@@ -2,7 +2,7 @@ package kperson.sqlh.common
 
 import org.sql2o.tools.NamedParameterStatement
 
-import SQLPrimitive._
+import SQLValue._
 import Row.ResultSetJDBC
 
 object ExecuteQuery {

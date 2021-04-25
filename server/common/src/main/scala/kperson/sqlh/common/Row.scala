@@ -6,7 +6,7 @@ case class Column(
   index: Int,
   name: String,
   label: String,
-  value: SQLPrimitive
+  value: SQLValue
 )
 
 case class Row(columns: List[Column])
@@ -34,7 +34,7 @@ object Row {
         .flatten
     }
 
-    def primitiveValue(index: Int): SQLPrimitive = {
+    def primitiveValue(index: Int): SQLValue = {
       val meta = rs.getMetaData
       rs.getString(index)
       if (rs.wasNull()) {
@@ -42,11 +42,11 @@ object Row {
       }
       else {
         meta.getColumnType(index) match {
-          case Types.TIMESTAMP | Types.TIME_WITH_TIMEZONE => PDate(SQLPrimitive.formats.timestampFormat.format(rs.getTimestamp(index)))
-          case Types.DATE => PDate(SQLPrimitive.formats.timestampFormat.format(rs.getDate(index)))
+          case Types.TIMESTAMP | Types.TIME_WITH_TIMEZONE => PDate(SQLValue.formats.timestampFormat.format(rs.getTimestamp(index)))
+          case Types.DATE => PDate(SQLValue.formats.timestampFormat.format(rs.getDate(index)))
           case Types.INTEGER | Types.SMALLINT | Types.TINYINT | Types.BIGINT => PLong(rs.getLong(index))
           case Types.TIME => {
-            val time = SQLPrimitive.formats.parseTimeOnly(rs.getString(index))
+            val time = SQLValue.formats.parseTimeOnly(rs.getString(index))
             PTime(time)
           }
           case Types.VARCHAR | Types.NVARCHAR | Types.LONGVARCHAR | Types.LONGNVARCHAR | Types.CHAR | Types.NCHAR => PString(rs.getString(index))

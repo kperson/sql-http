@@ -9,21 +9,21 @@ import java.util.Date
 import scala.math.abs
 import scala.util.{Failure, Success, Try}
 
-sealed trait SQLPrimitive
+sealed trait SQLValue
 
-case class PLong(value: Long) extends SQLPrimitive
+case class PLong(value: Long) extends SQLValue
 
-case class PString(value: String) extends SQLPrimitive
+case class PString(value: String) extends SQLValue
 
-case class PDate(value: String) extends SQLPrimitive
+case class PDate(value: String) extends SQLValue
 
-case class PBlob(value: String) extends SQLPrimitive
+case class PBlob(value: String) extends SQLValue
 
-case class PTime(value: Long) extends SQLPrimitive
+case class PTime(value: Long) extends SQLValue
 
-case object NullP extends SQLPrimitive
+case object NullP extends SQLValue
 
-object SQLPrimitive {
+object SQLValue {
 
   val formats = new DateFormats()
 
@@ -32,11 +32,11 @@ object SQLPrimitive {
     val timestampFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS")
     val dateFormat = new SimpleDateFormat("yyyy-MM-dd")
     val parseFormats = List(
+      timestampFormat,
       new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
       new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX"),
       new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXX"),
       new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"),
-      timestampFormat,
       dateFormat
     )
 
@@ -104,7 +104,7 @@ object SQLPrimitive {
 
 
   implicit class NamedParameterStatementJDBC(statement: NamedParameterStatement) {
-    def populateStatement(name: String, value: SQLPrimitive) {
+    def populateStatement(name: String, value: SQLValue) {
       value match {
         case PLong(v) => statement.setLong(name, v)
         case PString(v) => statement.setString(name, v)
@@ -125,7 +125,7 @@ object SQLPrimitive {
       }
     }
 
-    def populateStatement(params: Map[String, SQLPrimitive]) {
+    def populateStatement(params: Map[String, SQLValue]) {
       params.foreach { case (name, value) =>
         statement.populateStatement(name, value)
       }

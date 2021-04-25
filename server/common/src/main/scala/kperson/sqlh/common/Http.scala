@@ -26,7 +26,10 @@ class Http(
         HttpResponse(200, write(runner.run(command)))
       }
       catch {
-        case _: MappingException => HttpResponse(500, write(HttpError("unable to parse request")))
+        case ex: MappingException =>  {
+          println(ex.getMessage)
+          HttpResponse(500, write(HttpError("unable to parse request")))
+        }
         case ex: Throwable =>  HttpResponse(500, write(HttpError(ex.getMessage)))
       }
     }

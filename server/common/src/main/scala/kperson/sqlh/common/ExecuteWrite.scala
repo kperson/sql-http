@@ -1,7 +1,7 @@
 package kperson.sqlh.common
 
 import kperson.sqlh.common.Row.ResultSetJDBC
-import kperson.sqlh.common.SQLPrimitive._
+import kperson.sqlh.common.SQLValue._
 import org.sql2o.tools.NamedParameterStatement
 
 

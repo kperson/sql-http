@@ -38,7 +38,7 @@ object Row {
       val meta = rs.getMetaData
       rs.getString(index)
       if (rs.wasNull()) {
-        NullP
+        PNull
       }
       else {
         meta.getColumnType(index) match {

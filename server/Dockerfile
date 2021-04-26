@@ -15,7 +15,13 @@ RUN rm sbt.tgz
 ADD . /code
 WORKDIR /code
 RUN sbt clean
-RUN sbt "project http" stage
+RUN sbt stage
 CMD [ "/code/http/target/universal/stage/bin/http" ]
 
+RUN mv /code/aws-lambda-rie /usr/local/bin/aws-lambda-rie
+RUN chmod +x /usr/local/bin/aws-lambda-rie
+ADD entry-point.sh /entry-point.sh
+RUN chmod +x /entry-point.sh
+
+RUN rm -rf ${SBT_HOME}
 WORKDIR /

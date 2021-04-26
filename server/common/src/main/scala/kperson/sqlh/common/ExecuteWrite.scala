@@ -15,8 +15,8 @@ object ExecuteWrite {
         val query = sql2o.createQuery(command.sql, true)
         query.populateStatement(command.params, sql2o.getJdbcConnection)
         val update = query.executeUpdate()
-        val keys = update.getKeys.map { value: AnyRef =>
-          value.toString
+        val keys = update.getKeys.flatMap { value: AnyRef =>
+          Option(value).map { _.toString }
         }.toList
         WriteResponse(update.getResult, keys)
       }

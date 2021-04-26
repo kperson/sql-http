@@ -11,17 +11,17 @@ class PointSpec extends DBTest with Matchers {
 
   private val defaultCreate = """
       |CREATE TABLE point_table (
-      |  dec_col DECIMAL(10, 4),
-      |  double_col DOUBLE,
-      |  float_col FLOAT
+      |  dec_col DECIMAL(10, 4) NULL,
+      |  double_col DOUBLE NULL,
+      |  float_col FLOAT NULL
       |);
       |""".stripMargin
 
   private val postgresCreate = """
       |CREATE TABLE point_table (
-      |  dec_col DECIMAL(10, 4),
-      |  double_col double precision,
-      |  float_col real
+      |  dec_col DECIMAL(10, 4) NULL,
+      |  double_col double precision NULL,
+      |  float_col real NULL
       |);
       |""".stripMargin
 
@@ -53,6 +53,30 @@ class PointSpec extends DBTest with Matchers {
           val float = col.value.asInstanceOf[PDouble]
           abs(float.value - 3.1416) < 0.001 shouldBe true
         }
+      }
+    }
+  }
+
+  it should "write nulls" in {
+    foreachDB { case (dataSource, vendor) =>
+      val sql = createSQl.sql(vendor)
+      ConnectionPool.getConnection(dataSource).prepareStatement(sql).execute()
+      val insert = """
+        INSERT INTO point_table (dec_col, double_col, float_col)
+        VALUES (:dec_col, :double_col, :float_col)
+      """
+      val params = Map(
+        "dec_col" -> PNull,
+        "double_col" -> PNull,
+        "float_col" -> PNull
+      )
+      Write(Direct(dataSource), insert, params).run()
+      val select = "SELECT * FROM point_table WHERE dec_col IS NULL AND double_col IS NULL AND float_col IS NULL"
+      val result = Query(Direct(dataSource), select).run()
+      result.size shouldBe 1
+      result.head.columns.size shouldBe 3
+      result.head.columns.foreach { col =>
+        col.value shouldBe PNull
       }
     }
   }

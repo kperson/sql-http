@@ -20,3 +20,12 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
+  sql_http_lambda:
+    hostname: sql_http_lambda
+    ports:
+      - '9002:8080'
+    entrypoint: ["/entry-point.sh"]
+    command: kperson.sqlh.lambda.Handler
+    build:
+      context: ./server
+      dockerfile: Dockerfile

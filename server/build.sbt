@@ -25,11 +25,15 @@ lazy val common = (project in file("common")).settings(commonSettings: _*).
 
 lazy val lambda = (project in file("lambda")).settings(commonSettings: _*).
   settings(
-    libraryDependencies ++= Seq (
-      "com.amazonaws"           % "aws-lambda-java-core"        % "1.2.1",
-      "com.amazonaws"           % "aws-java-sdk-secretsmanager" % "1.11.1000"
+    mainClass in (Compile) := Some("com.amazonaws.services.lambda.runtime.api.client.AWSLambda"),
+      libraryDependencies ++= Seq (
+      "com.amazonaws"           % "aws-lambda-java-core"                     % "1.2.1",
+      "com.amazonaws"           % "aws-java-sdk-secretsmanager"              % "1.11.1000",
+      "com.amazonaws"           % "aws-lambda-java-runtime-interface-client" % "1.0.0"
     )
-  ).dependsOn(common)
+  )
+  .enablePlugins(JavaAppPackaging)
+  .dependsOn(common)
 
 
 lazy val http = (project in file("http"))

@@ -3,6 +3,7 @@ package kperson.sqlh.common
 import java.io.InputStream
 import Serialization.Formats._
 import org.json4s.MappingException
+import org.json4s.ParserUtil.ParseException
 import org.json4s.jackson.Serialization.{read, write}
 
 case class HttpRequest(body: InputStream, headers: Map[String, String])
@@ -26,8 +27,7 @@ class Http(
         HttpResponse(200, write(runner.run(command)))
       }
       catch {
-        case ex: MappingException =>  {
-          println(ex.getMessage)
+        case _: MappingException | _: ParseException => {
           HttpResponse(500, write(HttpError("unable to parse request")))
         }
         case ex: Throwable =>  HttpResponse(500, write(HttpError(ex.getMessage)))

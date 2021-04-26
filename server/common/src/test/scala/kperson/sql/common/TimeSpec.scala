@@ -20,7 +20,7 @@ class TimeSpec extends DBTest with Matchers {
   private val postgresCreate = """
       |CREATE TABLE time_table (
       | time_col TIME NULL,
-      | time_tz time with time zone
+      | time_tz time with time zone NULL
       |);
       |""".stripMargin
 
@@ -67,6 +67,32 @@ class TimeSpec extends DBTest with Matchers {
             dbTime.value shouldBe time
           }
         }
+      }
+    }
+  }
+
+  it should "write nulls" in {
+    foreachDB { case (dataSource, vendor) =>
+      val sql = createSQl.sql(vendor)
+      ConnectionPool.getConnection(dataSource).prepareStatement(sql).execute()
+      val insert =
+        """
+      INSERT INTO time_table (time_col, time_tz)
+      VALUES (:time_col, :time_tz)
+      """
+      val params = Map(
+        "time_col" -> PNull,
+        "time_tz" -> PNull
+      )
+      Write(Direct(dataSource), insert, params).run()
+      val select = "SELECT * FROM time_table"
+      val result = Query(Direct(dataSource), select).run()
+      Write(Direct(dataSource), "DELETE FROM time_table").run()
+
+      result.size shouldBe 1
+      result.head.columns.size shouldBe 2
+      result.head.columns.foreach { col =>
+        col.value shouldBe PNull
       }
     }
   }

@@ -69,4 +69,30 @@ class DateSpec extends DBTest with Matchers {
     }
   }
 
+  it should "write nulls" in {
+    foreachDB { case (dataSource, vendor) =>
+      val sql = createSQl.sql(vendor)
+      ConnectionPool.getConnection(dataSource).prepareStatement(sql).execute()
+      val insert =
+        """
+        INSERT INTO date_table (timestamp_col, datetime_col, date_col)
+        VALUES (:timestamp_col, :datetime_col, :date_col)
+      """
+      val params = Map(
+        "timestamp_col" -> PNull,
+        "datetime_col" -> PNull,
+        "date_col" -> PNull
+      )
+      Write(Direct(dataSource), insert, params).run()
+      val select = "SELECT * FROM date_table WHERE timestamp_col IS NULL AND datetime_col IS NULL AND date_col IS NULL"
+      val result = Query(Direct(dataSource), select).run()
+      Write(Direct(dataSource), "DELETE FROM date_table").run()
+
+      result.size shouldBe 1
+      result.head.columns.size shouldBe 3
+      result.head.columns.foreach { col =>
+        col.value shouldBe PNull
+      }
+    }
+  }
 }

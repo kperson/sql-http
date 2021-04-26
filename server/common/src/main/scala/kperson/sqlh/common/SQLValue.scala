@@ -16,7 +16,7 @@ case class PBlob(value: String) extends SQLValue
 case class PTime(value: Long) extends SQLValue
 case class PDouble(value: Double) extends SQLValue
 case class PDecimal(value: String) extends SQLValue
-case object NullP extends SQLValue
+case object PNull extends SQLValue
 
 object SQLValue {
 
@@ -121,8 +121,9 @@ object SQLValue {
             statement.addParameter(name, formatted)
           }
         }
-        case NullP => {
-          val x: String = null
+        case PNull => {
+          val x: AnyRef = null
+          statement.bind()
           statement.addParameter(name, x)
         }
       }

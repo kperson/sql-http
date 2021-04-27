@@ -2,12 +2,15 @@ package kperson.sqlh.http
 
 import kperson.sqlh.common._
 import com.sun.net.httpserver.{HttpExchange, HttpHandler, HttpServer}
+
+
 import java.net.InetSocketAddress
 
 
 object Main extends App with HttpHandler {
 
   LoadDrivers()
+
   val port = {
     Option(System.getenv("PORT")).getOrElse("8080").toInt
   }

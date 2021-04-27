@@ -60,7 +60,7 @@ object Serialization {
     }
   ))
 
-  val tmpFormats = org.json4s.DefaultFormats +
+  private val tmpFormats = org.json4s.DefaultFormats +
     MaskedSerializer +
     SQLPrimitiveSerializer +
     TransactionReferenceSerializer
@@ -83,7 +83,7 @@ object Serialization {
   ))
 
   object Formats {
-    implicit val formats = tmpFormats + new SQLCommandSerializer()(tmpFormats)
+    implicit val formats: Formats = tmpFormats + new SQLCommandSerializer()(tmpFormats)
   }
 
 }

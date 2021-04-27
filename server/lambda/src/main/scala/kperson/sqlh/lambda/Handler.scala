@@ -1,7 +1,7 @@
 package kperson.sqlh.lambda
 
 import com.amazonaws.services.lambda.runtime.{Context, RequestStreamHandler}
-import kperson.sqlh.common.HttpError
+import kperson.sqlh.common.{HttpError, LoadDrivers}
 import org.json4s.jackson.Serialization.{read, write}
 import kperson.sqlh.common.Serialization.Formats._
 import org.json4s.MappingException
@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets
 
 //https://rieckpil.de/java-aws-lambda-container-image-support-complete-guide/
 class Handler extends RequestStreamHandler {
+  LoadDrivers()
   val http = new kperson.sqlh.common.Http(Config.authorization, Config.resolvers)
 
   override def handleRequest(input: InputStream, output: OutputStream, context: Context) {

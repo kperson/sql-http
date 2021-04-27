@@ -19,7 +19,7 @@ object ExecuteQuery {
         query.populateStatement(command.params, sql2o.getJdbcConnection)
         query.executeAndFetch(new ResultSetHandler[Row] {
           override def handle(resultSet: ResultSet): Row = {
-            resultSet.toRow()
+            resultSet.toRow
           }
         }).asScala.toList
       }

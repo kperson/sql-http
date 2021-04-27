@@ -2,8 +2,6 @@ package kperson.sqlh.common
 
 import kperson.sqlh.common.SQLValue._
 import org.sql2o.Sql2o
-import scala.jdk.CollectionConverters._
-
 
 object ExecuteWrite {
 

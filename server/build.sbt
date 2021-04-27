@@ -20,7 +20,8 @@ lazy val common = (project in file("common")).settings(commonSettings: _*).
       "com.dimafeng"           %% "testcontainers-scala-mariadb"    % "0.39.3"    % Test,
       "com.dimafeng"           %% "testcontainers-scala-postgresql" % "0.39.3"    % Test,
       "ch.qos.logback"          % "logback-classic"                 % "1.2.3"     % Test
-    )
+
+)
   )
 
 lazy val lambda = (project in file("lambda")).settings(commonSettings: _*).
@@ -29,8 +30,9 @@ lazy val lambda = (project in file("lambda")).settings(commonSettings: _*).
       libraryDependencies ++= Seq (
       "com.amazonaws"           % "aws-lambda-java-core"                     % "1.2.1",
       "com.amazonaws"           % "aws-java-sdk-secretsmanager"              % "1.11.1000",
-      "com.amazonaws"           % "aws-lambda-java-runtime-interface-client" % "1.0.0"
-    )
+      "com.amazonaws"           % "aws-lambda-java-runtime-interface-client" % "1.0.0",
+      "com.amazonaws"           % "aws-java-sdk-secretsmanager"              % "1.11.1000"
+      )
   )
   .enablePlugins(JavaAppPackaging)
   .dependsOn(common)

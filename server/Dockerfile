@@ -20,8 +20,8 @@ CMD [ "/code/http/target/universal/stage/bin/http" ]
 
 RUN mv /code/aws-lambda-rie /usr/local/bin/aws-lambda-rie
 RUN chmod +x /usr/local/bin/aws-lambda-rie
-ADD entry-point.sh /entry-point.sh
-RUN chmod +x /entry-point.sh
+ADD entry-point.sh /lambda-entry-point.sh
+RUN chmod +x /lambda-entry-point.sh
 
 RUN rm -rf ${SBT_HOME}
 WORKDIR /

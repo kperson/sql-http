@@ -1,9 +1,10 @@
 package kperson.sqlh.common
 
 import java.io.ByteArrayInputStream
-import java.sql.{Connection, Time, Timestamp, Types}
+import java.sql.{Connection, Time, Timestamp}
 import java.text.SimpleDateFormat
 import java.util.Date
+import scala.annotation.tailrec
 import scala.math.abs
 import scala.util.{Failure, Success, Try}
 
@@ -84,14 +85,13 @@ object SQLValue {
       }
     }
 
-    private def parse(str: String, formats: List[SimpleDateFormat]): Date = {
+    @tailrec private def parse(str: String, formats: List[SimpleDateFormat]): Date = {
       formats match {
-        case head :: tail => {
+        case head :: tail =>
           Try(head.parse(str)) match {
             case Success(date) => date
             case Failure(_) => parse(str, tail)
           }
-        }
         case Nil => throw new RuntimeException(s"unable to convert $str to a date")
       }
     }
@@ -105,12 +105,11 @@ object SQLValue {
         case PString(v) => statement.addParameter(name, v)
         case PBlob(v) => statement.addParameter(name, new ByteArrayInputStream(java.util.Base64.getDecoder.decode(v)))
         case PDate(v) => statement.addParameter(name, new Timestamp(formats.parse(v).getTime))
-        case PDouble(v) => {
+        case PDouble(v) =>
           val d: java.lang.Double = v
           statement.addParameter(name, d)
-        }
         case PDecimal(v) => statement.addParameter(name, new java.math.BigDecimal(v))
-        case PTime(v) => {
+        case PTime(v) =>
           val isPostgres = connection.getMetaData.getURL.toLowerCase.startsWith("jdbc:postgresql")
           if (isPostgres) {
             val (hours, minutes, seconds) = formats.decomposeTime(v)
@@ -120,12 +119,10 @@ object SQLValue {
             val formatted = formats.formatTimeOnly(v)
             statement.addParameter(name, formatted)
           }
-        }
-        case PNull => {
+        case PNull =>
           val x: AnyRef = null
           statement.bind()
           statement.addParameter(name, x)
-        }
       }
     }
 

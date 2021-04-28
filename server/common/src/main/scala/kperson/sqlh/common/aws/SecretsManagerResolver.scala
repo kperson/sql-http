@@ -1,10 +1,10 @@
-package kperson.sqlh.lambda
+package kperson.sqlh.common.aws
 
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder
 import com.amazonaws.services.secretsmanager.model.GetSecretValueRequest
-import kperson.sqlh.common.{Custom, DataSource, DataSourceReferenceResolver, Serialization}
+import kperson.sqlh.common.Serialization.Formats._
+import kperson.sqlh.common.{Custom, DataSource, DataSourceReferenceResolver}
 import org.json4s.jackson.Serialization.read
-import Serialization.Formats._
 
 
 case class SecretsManagerPayload(secret: String, db: String)

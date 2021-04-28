@@ -4,8 +4,6 @@ services:
   mysql:
     hostname: sql_http_mysql
     image: mysql:5.7
-    ports:
-      - '3308:3306'
     environment:
         MYSQL_ROOT_PASSWORD: test_password_root
         MYSQL_DATABASE: test_db

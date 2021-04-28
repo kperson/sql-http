@@ -1,6 +1,4 @@
-package kperson.sqlh.lambda
-
-import kperson.sqlh.common.{Custom, DataSource, DataSourceReferenceResolver}
+package kperson.sqlh.common
 
 case class CacheCredentials(dataSource: DataSource, expiration: Long)
 

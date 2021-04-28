@@ -1,6 +1,7 @@
 package kperson.sqlh.lambda
 
-import kperson.sqlh.common.DataSourceReferenceResolver
+import kperson.sqlh.common.{CachedResolver, DataSourceReferenceResolver}
+import kperson.sqlh.common.aws.SecretsManagerResolver
 
 object Config {
 
